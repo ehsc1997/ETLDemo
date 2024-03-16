@@ -1,4 +1,6 @@
 import configparser
+import pandas as pd
+import numpy as np
 from airtable import AirtableConnector
 
 def main():
@@ -12,15 +14,21 @@ def main():
 
     connector = AirtableConnector(TOKEN, BASE_ID)
 
-    response = connector.create_table('test3', ['column1', 'column2', 'column3'], ['singleLineText', 'singleLineText', 'singleLineText'])
+    df = pd.read_csv("todas_recetas.csv")
+    df = df.replace(np.nan, None)[['nombres','descripciones','comensales','tiempos','dificultades']]
+    columns = list(df.columns)
+    dtypes = ['singleLineText']*len(df.columns)
+    response = connector.create_table('ensaladas', columns, dtypes)
 
     TABLE_ID = response.json().get('id')
 
     if not TABLE_ID:
         print(response.json())
+    
+    responses = connector.load_from_df(df, TABLE_ID)
 
-    print(TABLE_ID)
+    return responses
 
 
 if __name__ == "__main__":
-    main()
+    responses = main()

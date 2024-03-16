@@ -1,5 +1,4 @@
 import requests
-import pprint
 
 # OOP approach to Airtable functionality - import class
 class AirtableConnector:
@@ -66,14 +65,16 @@ class AirtableConnector:
         for i in range(0, df.shape[0], 10):
 
             try:
-                samples = [{"fields" : df.iloc[i+j, :].to_dict()} for j in range(10)]
+                records = [{"fields" : df.iloc[i+j, :].to_dict()} for j in range(10)]
             except IndexError:
-                continue
+                records = [{"fields" : df.iloc[i+j, :].to_dict()} for j in range(df.shape[0]%10)]
             finally:
-                datos_subir = {"records" : samples,
+                datos_subir = {"records" : records,
                             "typecast" : True}
-                
-                response = requests.post(url = endpoint, json = datos_subir, headers = headers)
+
+            response = requests.post(url = endpoint, json = datos_subir, headers = headers)
+
+            responses.append(response)
 
             print(f"response: {response.status_code}")
 
@@ -81,14 +82,13 @@ class AirtableConnector:
 
             print("-"*120)
 
-            pprint(response.json(), sort_dicts = False)
+            print(response.json())
 
             print("-"*120)
 
-            responses.append(response)
-
         return responses
         
+
 # Functional approach - helper functions can also be imported
 def format_airtable_schema(names, dtypes):
 
@@ -141,14 +141,14 @@ def airtable_load(df, TOKEN, BASE_ID, TABLE_ID):
     for i in range(0, df.shape[0], 10):
 
         try:
-            samples = [{"fields" : df.iloc[i+j, :].to_dict()} for j in range(10)]
+            records = [{"fields" : df.iloc[i+j, :].to_dict()} for j in range(10)]
         except IndexError:
-            continue
+            records = [{"fields" : df.iloc[i+j, :].to_dict()} for j in range(df.shape[0]%10)]
         finally:
-            datos_subir = {"records" : samples,
+            datos_subir = {"records" : records,
                         "typecast" : True}
             
-            response = requests.post(url = endpoint, json = datos_subir, headers = headers)
+        response = requests.post(url = endpoint, json = datos_subir, headers = headers)
 
         print(f"response: {response.status_code}")
 
@@ -156,7 +156,7 @@ def airtable_load(df, TOKEN, BASE_ID, TABLE_ID):
 
         print("-"*120)
 
-        pprint(response.json(), sort_dicts = False)
+        print(response.json())
 
         print("-"*120)
 
